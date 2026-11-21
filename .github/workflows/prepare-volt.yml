@@ -2,6 +2,10 @@ name: Prepare real Volt client
 
 on:
   workflow_dispatch:
+  push:
+    branches: [volt-migration]
+    paths:
+      - '.github/workflows/prepare-volt.yml'
 
 permissions:
   contents: read
