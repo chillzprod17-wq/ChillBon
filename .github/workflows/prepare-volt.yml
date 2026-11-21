@@ -1,0 +1,31 @@
+name: Prepare real Volt client
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download official Volt v1.0.14
+        run: |
+          curl --fail --location --retry 3 \
+            "https://github.com/plus-emulator/Volt/releases/download/v1.0.14/volt-client.zip" \
+            --output volt-client.zip
+      - name: Verify release checksum
+        run: |
+          echo "188cafcaf6ced436f4c4b429e97bd11ad1b2487d232515ef0266b7f24b211636  volt-client.zip" | sha256sum --check
+      - name: Extract client
+        run: |
+          mkdir -p client
+          unzip -q volt-client.zip -d client
+          test -f client/index.html || (echo "Expected client/index.html missing; inspect release structure" && exit 1)
+      - name: Upload client bundle for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: chillbon-volt-v1.0.14
+          path: client/
+          retention-days: 30
