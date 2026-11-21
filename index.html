@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChillBon — Alpha 0.1</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #111111;
+  color: white;
+  font-family: Verdana, sans-serif;
+}
+header {
+  padding: 15px 25px;
+  background: #292929;
+  border-bottom: 4px solid #111;
+  color: #ffcf30;
+  font-size: 24px;
+  font-weight: bold;
+}
+main {
+  max-width: 1050px;
+  margin: 25px auto;
+  padding: 0 15px;
+}
+canvas {
+  width: 100%;
+  max-width: 960px;
+  display: block;
+  background: #171717;
+  border: 4px solid #555;
+  image-rendering: pixelated;
+  cursor: pointer;
+}
+p { color: #bbb; }
+</style>
+</head>
+<body>
+
+<header>CHILLBON | ALPHA 0.1</header>
+
+<main>
+<h3>Моя первая комната</h3>
+<canvas id="game" width="960" height="600"></canvas>
+<p>Нажми на любую клетку, чтобы персонаж пошёл туда.</p>
+</main>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+
+const SIZE = 10;
+const TW = 64;
+const TH = 32;
+const OX = 480;
+const OY = 110;
+
+const player = {
+  x: 4,
+  y: 4,
+  tx: 4,
+  ty: 4
+};
+
+function iso(x, y) {
+  return {
+    x: OX + (x - y) * TW / 2,
+    y: OY + (x + y) * TH / 2
+  };
+}
+
+function tile(x, y) {
+  const p = iso(x, y);
+
+  ctx.beginPath();
+  ctx.moveTo(p.x, p.y);
+  ctx.lineTo(p.x + 32, p.y + 16);
+  ctx.lineTo(p.x, p.y + 32);
+  ctx.lineTo(p.x - 32, p.y + 16);
+  ctx.closePath();
+
+  ctx.fillStyle = (x + y) % 2
+    ? "#a7a39a"
+    : "#c8c2b3";
+
+  ctx.fill();
+  ctx.strokeStyle = "#77736c";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function character() {
+  const p = iso(player.x, player.y);
+  const x = Math.round(p.x);
+  const y = Math.round(p.y + 16);
+
+  // Тень
+  ctx.fillStyle = "#555";
+  ctx.beginPath();
+  ctx.ellipse(x, y, 13, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Ноги
+  ctx.fillStyle = "#26365a";
+  ctx.fillRect(x - 9, y - 20, 8, 19);
+  ctx.fillRect(x + 2, y - 20, 8, 19);
+
+  // Обувь
+  ctx.fillStyle = "#171717";
+  ctx.fillRect(x - 10, y - 3, 10, 5);
+  ctx.fillRect(x + 2, y - 3, 10, 5);
+
+  // Футболка
+  ctx.fillStyle = "#d34b44";
+  ctx.fillRect(x - 12, y - 43, 24, 25);
+
+  // Руки
+  ctx.fillStyle = "#e6b78f";
+  ctx.fillRect(x - 16, y - 39, 5, 18);
+  ctx.fillRect(x + 11, y - 39, 5, 18);
+
+  // Голова
+  ctx.fillStyle = "#e6b78f";
+  ctx.fillRect(x - 10, y - 63, 20, 20);
+
+  // Волосы
+  ctx.fillStyle = "#423026";
+  ctx.fillRect(x - 11, y - 66, 22, 8);
+  ctx.fillRect(x - 11, y - 60, 4, 8);
+
+  // Глаза
+  ctx.fillStyle = "#222";
+  ctx.fillRect(x - 5, y - 53, 2, 2);
+  ctx.fillRect(x + 5, y - 53, 2, 2);
+
+  // Ник
+  ctx.font = "bold 13px Verdana";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#fff";
+  ctx.fillText("Player", x, y - 78);
+}
+
+function update() {
+  const dx = player.tx - player.x;
+  const dy = player.ty - player.y;
+  const distance = Math.hypot(dx, dy);
+  const speed = 0.06;
+
+  if (distance > speed) {
+    player.x += dx / distance * speed;
+    player.y += dy / distance * speed;
+  } else {
+    player.x = player.tx;
+    player.y = player.ty;
+  }
+}
+
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      tile(x, y);
+    }
+  }
+
+  character();
+}
+
+canvas.addEventListener("click", e => {
+  const rect = canvas.getBoundingClientRect();
+
+  const mx = (e.clientX - rect.left)
+    * canvas.width / rect.width;
+  const my = (e.clientY - rect.top)
+    * canvas.height / rect.height;
+
+  const a = (mx - OX) / (TW / 2);
+  const b = (my - OY - 16) / (TH / 2);
+
+  const x = Math.floor((a + b) / 2);
+  const y = Math.floor((b - a) / 2);
+
+  if (x >= 0 && x < SIZE && y >= 0 && y < SIZE) {
+    player.tx = x;
+    player.ty = y;
+  }
+});
+
+function loop() {
+  update();
+  render();
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
