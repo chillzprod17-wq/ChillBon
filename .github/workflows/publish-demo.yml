@@ -2,6 +2,10 @@ name: Publish ChillBon browser demo
 
 on:
   workflow_dispatch:
+  push:
+    branches: [volt-migration]
+    paths:
+      - '.github/workflows/publish-demo.yml'
 
 permissions:
   contents: read
