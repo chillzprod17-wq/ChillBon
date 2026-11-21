@@ -1,57 +1,50 @@
 name: Publish ChillBon browser demo
 
 on:
-  workflow_dispatch:
   push:
     branches: [volt-migration]
     paths:
       - '.github/workflows/publish-demo.yml'
+  workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: chillbon-pages
-  cancel-in-progress: false
+  contents: write
 
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout existing site
+      - name: Checkout public site
         uses: actions/checkout@v4
         with:
           ref: main
-          path: existing
-      - name: Preserve existing homepage
-        run: |
-          mkdir -p public/demo
-          cp existing/index.html public/index.html
-          touch public/.nojekyll
-      - name: Download verified Volt release
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Download and verify official Volt v1.0.14
         run: |
           curl --fail --location --retry 3 \
-            "https://github.com/plus-emulator/Volt/releases/download/v1.0.14/volt-client.zip" \
-            --output volt-client.zip
-          echo "188cafcaf6ced436f4c4b429e97bd11ad1b2487d232515ef0266b7f24b211636  volt-client.zip" | sha256sum --check
-          unzip -q volt-client.zip -d public/demo
-          test -f public/demo/index.html
-      - name: Explain demo limitations
+            https://github.com/plus-emulator/Volt/releases/download/v1.0.14/volt-client.zip \
+            --output /tmp/volt-client.zip
+          echo "188cafcaf6ced436f4c4b429e97bd11ad1b2487d232515ef0266b7f24b211636  /tmp/volt-client.zip" | sha256sum --check
+          mkdir -p demo
+          unzip -q -o /tmp/volt-client.zip -d demo
+          test -f demo/index.html
+      - name: Add honest preview notice
         run: |
-          cat > public/demo/DEMO-NOTICE.txt <<'EOF'
+          cat > demo/README-PREVIEW.txt <<'EOF'
           ChillBon preview of upstream Volt v1.0.14.
-          A static client requires PlusEMU, CMS login/SSO, WebSocket, database and assets to play.
-          This is not a functional multiplayer hotel.
+          This is a static client preview, not a playable multiplayer hotel.
+          PlusEMU, CMS SSO login, WebSocket, database and game assets are still required.
           EOF
-      - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
-      - name: Deploy GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          touch .nojekyll
+      - name: Commit demo to existing Pages source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add demo .nojekyll
+          if git diff --cached --quiet; then
+            echo "Demo already up to date"
+          else
+            git commit -m "Publish verified Volt demo at /demo"
+            git push origin HEAD:main
+          fi
