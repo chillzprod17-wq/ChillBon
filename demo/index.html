@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <!-- Hand-off URLs carry ?sso= / ?token=; never send them on in a Referer. -->
+    <meta name="referrer" content="strict-origin" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Volt</title>
+    <!-- The loading screen's photo frame paints with the page, before any script runs.
+         LoadingView draws the same frame in the same place once React mounts. -->
+    <style>html,body{background:#0e151c;margin:0}.boot-loading-screen{background:#0e151c;position:fixed;inset:0;overflow:hidden}.boot-loading-screen__photo{width:500px;height:434px;position:absolute;top:calc(50% - 250px);left:calc(50% - 250px)}.boot-loading-screen__photo img{pointer-events:none;position:absolute;top:0;left:0}</style>
+  <script type="module" crossorigin src="./assets/index-41t-1bdR.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-P2Xu9kJm.js">
+  <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-hePW80VL.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-meBLgch6.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-pixi-eCvSEyir.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-audio-FD-1ch7Y.js">
+  <link rel="modulepreload" crossorigin href="./assets/volt-renderer-BcQeayTN.js">
+  <link rel="modulepreload" crossorigin href="./assets/PetData-Bf3heLvx.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-jsonc-Dd_MsIHr.js">
+  <link rel="modulepreload" crossorigin href="./assets/src-Dcc6FpQe.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-query-M7bu-c-M.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-react-BERcmDB0.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-icons-DtP19jwb.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-state-BzMLXH6Q.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-motion-DNyxGG7v.js">
+  <link rel="preload" as="style" crossorigin href="./src/assets/src-BDEVBD8a.css">
+</head>
+<body>
+    <div id="root">
+        <div class="boot-loading-screen">
+            <div class="boot-loading-screen__photo">
+                <img src="./src/assets/splash_bg-DIQS5Q1z.png" alt="" draggable="false" />
+                <img src="./src/assets/splash_top-CaJ_t67p.png" alt="" draggable="false" />
+            </div>
+        </div>
+    </div>
+    <!-- With nginx SSI on for this page ("ssi on; ssi_silent_errors on;"), the boot configuration ships
+         inside it instead of costing round trips; without SSI these stay comments and the client fetches
+         the files from configuration/. -->
+    <script type="application/json" id="volt-boot-client-mode"><!--# include virtual="configuration/client-mode.json" --></script>
+    <script type="application/json" id="volt-boot-renderer-config"><!--# include virtual="configuration/renderer-config.json" --></script>
+    <script type="application/json" id="volt-boot-ui-config"><!--# include virtual="configuration/ui-config.json" --></script>
+    <script type="application/json" id="volt-boot-pets"><!--# include virtual="configuration/pets.json" --></script>
+    <!-- {"version": "<sha1>"} of the furnidata the server generates; the client then boots with that exact version. -->
+    <script type="application/json" id="volt-boot-furnidata-version"><!--# include virtual="configuration/furnidata-version.json" --></script>
+    <!-- {"files": {"ExternalTexts.json": "<version>", ...}}: gamedata the client then requests by version, cacheable until it changes. -->
+    <script type="application/json" id="volt-boot-gamedata-versions"><!--# include virtual="configuration/gamedata-versions.json" --></script>
+</body>
+</html>

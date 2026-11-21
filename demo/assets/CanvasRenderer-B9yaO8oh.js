@@ -1,0 +1,1 @@
+import{br as e}from"./vendor-pixi-eCvSEyir.js";export{e as CanvasRenderer};

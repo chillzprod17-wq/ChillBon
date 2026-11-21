@@ -1,0 +1,1 @@
+import{f as e}from"./vendor-pixi-eCvSEyir.js";export{e as BitmapFont};

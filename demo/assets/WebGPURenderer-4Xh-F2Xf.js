@@ -1,0 +1,1 @@
+import{mt as e}from"./vendor-pixi-eCvSEyir.js";export{e as WebGPURenderer};

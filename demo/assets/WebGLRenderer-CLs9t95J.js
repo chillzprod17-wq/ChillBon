@@ -1,0 +1,1 @@
+import{$t as e}from"./vendor-pixi-eCvSEyir.js";export{e as WebGLRenderer};
