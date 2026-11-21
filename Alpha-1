@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chillbo — Alpha 0.1</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #171d2b;
+      color: #fff;
+      font-family: Verdana, sans-serif;
+    }
+    header {
+      background: #29354b;
+      padding: 14px 22px;
+      border-bottom: 3px solid #101622;
+      font-weight: bold;
+      color: #ffcf55;
+    }
+    main {
+      max-width: 1000px;
+      margin: 25px auto;
+      padding: 0 12px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      max-width: 960px;
+      background: #202b3b;
+      image-rendering: pixelated;
+      border: 4px solid #44516a;
+      cursor: pointer;
+    }
+    p { color: #bfc9dc; }
+  </style>
+</head>
+<body>
+<header>CHILLBO | ALPHA 0.1</header>
+<main>
+  <h3>Моя первая комната</h3>
+  <canvas id="game" width="960" height="600"></canvas>
+  <p>Нажми на клетку, чтобы персонаж пошёл к ней.</p>
+</main>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+
+const SIZE = 10;
+const TILE_W = 64;
+const TILE_H = 32;
+const ORIGIN_X = 480;
+const ORIGIN_Y = 100;
+
+const player = {
+  x: 4,
+  y: 4,
+  targetX: 4,
+  targetY: 4
+};
+
+function iso(x, y) {
+  return {
+    x: ORIGIN_X + (x - y) * TILE_W / 2,
+    y: ORIGIN_Y + (x + y) * TILE_H / 2
+  };
+}
+
+function polygon(points, color, stroke) {
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) {
+    ctx.lineTo(points[i].x, points[i].y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  if (stroke) {
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+}
+
+function drawTile(x, y) {
+  const p = iso(x, y);
+  const selected =
+    x === Math.floor(player.targetX) &&
+    y === Math.floor(player.targetY);
+
+  const color = selected
+    ? "#e8c77b"
+    : (x + y) % 2 === 0 ? "#b6b5aa" : "#999d98";
+
+  polygon([
+    { x: p.x, y: p.y },
+    { x: p.x + 32, y: p.y + 16 },
+    { x: p.x, y: p.y + 32 },
+    { x: p.x - 32, y: p.y + 16 }
+  ], color, "#747b80");
+}
+
+function drawPlayer() {
+  const p = iso(player.x, player.y);
+  const px = Math.round(p.x);
+  const py = Math.round(p.y + 16);
+
+  ctx.fillStyle = "#364052";
+  ctx.beginPath();
+  ctx.ellipse(px, py, 14, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Ноги
+  ctx.fillStyle = "#263a67";
+  ctx.fillRect(px - 9, py - 20, 8, 19);
+  ctx.fillRect(px + 2, py - 20, 8, 19);
+
+  // Обувь
+  ctx.fillStyle = "#161a25";
+  ctx.fillRect(px - 10, py - 3, 10, 5);
+  ctx.fillRect(px + 2, py - 3, 10, 5);
+
+  // Тело
+  ctx.fillStyle = "#d34d45";
+  ctx.fillRect(px - 12, py - 43, 24, 25);
+
+  // Руки
+  ctx.fillStyle = "#e5b68f";
+  ctx.fillRect(px - 16, py - 39, 5, 18);
+  ctx.fillRect(px + 11, py - 39, 5, 18);
+
+  // Голова
+  ctx.fillStyle = "#e5b68f";
+  ctx.fillRect(px - 10, py - 63, 20, 20);
+
+  // Волосы
+  ctx.fillStyle = "#473329";
+  ctx.fillRect(px - 11, py - 66, 22, 8);
+  ctx.fillRect(px - 11, py - 60, 4, 8);
+
+  // Глаза
+  ctx.fillStyle = "#20242c";
+  ctx.fillRect(px - 5, py - 53, 2, 2);
+  ctx.fillRect(px + 5, py - 53, 2, 2);
+
+  // Никнейм
+  ctx.font = "bold 13px Verdana";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText("Player", px, py - 77);
+}
+
+function update() {
+  const speed = 0.055;
+  const dx = player.targetX - player.x;
+  const dy = player.targetY - player.y;
+  const distance = Math.hypot(dx, dy);
+
+  if (distance > speed) {
+    player.x += dx / distance * speed;
+    player.y += dy / distance * speed;
+  } else {
+    player.x = player.targetX;
+    player.y = player.targetY;
+  }
+}
+
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      drawTile(x, y);
+    }
+  }
+
+  drawPlayer();
+}
+
+canvas.addEventListener("click", event => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = (event.clientX - rect.left) * canvas.width / rect.width;
+  const my = (event.clientY - rect.top) * canvas.height / rect.height;
+
+  const a = (mx - ORIGIN_X) / (TILE_W / 2);
+  const b = (my - ORIGIN_Y - 16) / (TILE_H / 2);
+
+  const x = Math.floor((a + b) / 2);
+  const y = Math.floor((b - a) / 2);
+
+  if (x >= 0 && x < SIZE && y >= 0 && y < SIZE) {
+    player.targetX = x;
+    player.targetY = y;
+  }
+});
+
+function loop() {
+  update();
+  render();
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
