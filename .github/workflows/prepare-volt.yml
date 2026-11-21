@@ -27,6 +27,19 @@ jobs:
           mkdir -p client
           unzip -q volt-client.zip -d client
           test -f client/index.html || (echo "Expected client/index.html missing; inspect release structure" && exit 1)
+      - name: Check upstream client structure
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path("client")
+          files=[p for p in root.rglob("*") if p.is_file()]
+          print("Files:", len(files))
+          assert len(files)>20, "Unexpectedly small client release"
+          assert (root/"index.html").exists()
+          configuration=root/"configuration"
+          assert configuration.exists(), "Client configuration directory missing"
+          print("Configuration examples:", [p.name for p in configuration.iterdir()])
+          PY
       - name: Upload client bundle for deployment
         uses: actions/upload-artifact@v4
         with:
